@@ -334,7 +334,6 @@
 ![image](./data/f1f629811b35e30a73a9fe42136f4bc4.png)
 ![image](./data/f226b76d6d3b9b1bcba1c2ca1f58710c.gif)
 ![image](./data/f35f3e50980404445d5f3fa1e01a37dd.gif)
-![image](./data/f35f3e50980404445d5f3fa1e01a37dd.md)
 ![image](./data/f35f3e50980404445d5f3fa1e01a37dd.png)
 ![image](./data/f5f5faab09b1433576735cb44dcf030e.png)
 ![image](./data/f86828dbf2156a94e12b513c1b20d4af.png)
