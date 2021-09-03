@@ -206,7 +206,6 @@
 ![image](./data/ba7a82b0ee9b22db34303cfe935a146e.png)
 ![image](./data/2187868fadafa51e4a188ced50d1542d.png)
 ![image](./data/49166c906b24fe197f7842f1661c9903.gif)
-![image](./data/b26c55265aaf69b39b3f2056b64a17bf.png)
 ![image](./data/4c8ed0fa5c0fa9f91b89a9e32c743602.png)
 ![image](./data/7ef021113a957c1d7072c5a90500d975.gif)
 ![image](./data/1fd023577861a35f96078cc4f10fac6b.gif)
