@@ -10,14 +10,14 @@ find ./data -type f -name '*' | while read FILE; do
   echo "done "${FILE}
 done
 
-find ./data -type f -name '*' | while read FILE; do
-  md5=$(md5sum "${FILE}" | awk '{print $1}')
-  ext="$(echo ${FILE} | grep -o "\.[a-zA-Z]*$")"
-  for name in $(ls -l ./data | grep $md5 | awk '{print $9}'); do
-    other_ext="$(echo ${name} | grep -o "\.[a-zA-Z]*$")"
-    if [ "$ext" != "$other_ext" ]; then
-      echo "dumplicate "${FILE}
-      rm -f ${FILE}
-    fi
-  done
-done
+declare -A seen_md5
+while IFS= read -r FILE; do
+  basename="${FILE##*/}"
+  md5="${basename%.*}"
+  if [ -n "${seen_md5[$md5]}" ]; then
+    echo "duplicate $FILE"
+    rm -f "$FILE"
+  else
+    seen_md5[$md5]=1
+  fi
+done < <(find ./data -type f -name '*')
