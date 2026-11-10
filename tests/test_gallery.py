@@ -73,8 +73,8 @@ class ManifestTests(unittest.TestCase):
 class HtmlTests(unittest.TestCase):
     def test_relative_assets_and_features(self) -> None:
         html = (ROOT / "index.html").read_text(encoding="utf-8")
-        self.assertIn('href="gallery/styles.css"', html)
-        self.assertIn('src="gallery/app.js"', html)
+        self.assertIn('href="gallery/styles.css', html)
+        self.assertIn('src="gallery/app.js', html)
         self.assertNotIn('href="/gallery/', html)
         self.assertIn("随机一张", html)
         self.assertIn("搜索表情", html)

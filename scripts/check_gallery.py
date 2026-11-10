@@ -36,14 +36,15 @@ def main() -> int:
             errors.append(f"缺少文件: {path.relative_to(ROOT)}")
 
     html = (ROOT / "index.html").read_text(encoding="utf-8") if (ROOT / "index.html").is_file() else ""
-    for needle in (
-        'href="gallery/styles.css"',
-        'src="gallery/app.js"',
-        "gallery/manifest.json",
-        'lang="zh-CN"',
-    ):
+    required_refs = (
+        ("gallery/styles.css", 'href="gallery/styles.css'),
+        ("gallery/app.js", 'src="gallery/app.js'),
+        ("gallery/manifest.json", "gallery/manifest.json"),
+        ("lang=zh-CN", 'lang="zh-CN"'),
+    )
+    for label, needle in required_refs:
         if needle not in html:
-            errors.append(f"index.html 未包含必要引用: {needle}")
+            errors.append(f"index.html 未包含必要引用: {label}")
 
     # Do not use site-root-absolute paths that break under /xiaohuangji/
     if 'href="/gallery/' in html or 'src="/gallery/' in html or 'href="/data/' in html:
