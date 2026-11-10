@@ -23,10 +23,16 @@ class ManifestTests(unittest.TestCase):
 
     def test_counts(self) -> None:
         self.assertEqual(self.manifest["count"], 769)
-        self.assertEqual(self.manifest["taggedCount"], 101)
-        self.assertEqual(self.manifest["untaggedCount"], 668)
         self.assertEqual(self.manifest["formats"], {"gif": 472, "jpg": 4, "png": 293})
         self.assertEqual(len(self.manifest["items"]), 769)
+        self.assertEqual(
+            self.manifest["taggedCount"] + self.manifest["untaggedCount"],
+            self.manifest["count"],
+        )
+        self.assertEqual(self.manifest["taggedCount"], len(self.tags["items"]))
+        # Library is treated as fully tagged aside from any leftover that could not be understood.
+        self.assertGreaterEqual(self.manifest["taggedCount"], 768)
+        self.assertLessEqual(self.manifest["untaggedCount"], 1)
 
     def test_every_data_file_is_listed_and_paths_stable(self) -> None:
         data = {p.name for p in (ROOT / "data").iterdir() if p.is_file()}

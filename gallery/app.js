@@ -159,7 +159,7 @@
     const opts = options || {};
     const doc = opts.document || document;
     const win = doc.defaultView || opts.window || (typeof window !== "undefined" ? window : null);
-    const manifestUrl = opts.manifestUrl || "gallery/manifest.json";
+    const manifestUrl = opts.manifestUrl || "gallery/manifest.json?v=2";
     const state = {
       query: "",
       format: "",
@@ -204,10 +204,16 @@
 
     function renderHint() {
       if (!manifest) return;
-      els.hint.textContent =
-        "格式分类覆盖全部 " + manifest.count + " 张。语义搜索目前只覆盖已人工标注的 " +
-        manifest.taggedCount + " 张；其余 " + manifest.untaggedCount +
-        " 张显示为「未标注」，不能从哈希文件名推断中文含义。";
+      if (!manifest.untaggedCount) {
+        els.hint.textContent =
+          "格式分类和语义搜索均已覆盖全部 " + manifest.count +
+          " 张。语义标签为人工查看后标注，不能从哈希文件名推断含义。";
+      } else {
+        els.hint.textContent =
+          "格式分类覆盖全部 " + manifest.count + " 张。语义搜索覆盖已人工标注的 " +
+          manifest.taggedCount + " 张；另有 " + manifest.untaggedCount +
+          " 张因无法确认含义仍为「未标注」，不能从哈希文件名推断中文含义。";
+      }
     }
 
     function chip(label, pressed, dataset, count) {
