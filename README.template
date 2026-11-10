@@ -1,25 +1,24 @@
 # 小黄鸡表情
-收集各种小黄鸡表情
-![image](./data/ae57242ff3bbab5a836a7c63193648dc.gif)
+
+收集各种小黄鸡表情。浏览、搜索、预览和随机挑选请打开网页图库：
+
+**[👉 打开网页图库](https://esrrhs.github.io/xiaohuangji/)**
+
+https://esrrhs.github.io/xiaohuangji/
 
 # 版权
-内容收集自网络，如侵权请联系删除
 
-The content is collected from the Internet, if infringement, please contact me to delete
+内容收集自网络，如侵权请联系删除。
+
+The content is collected from the Internet, if infringement, please contact me to delete.
 
 # 使用
-clone 下载项目，`data/` 目录就是各种表情。文件名是内容的 MD5，请不要直接改名或删除原图。
 
-更推荐打开静态网页图库浏览、搜索、预览和随机挑选：
-
-- 部署到 GitHub Pages 后访问：https://esrrhs.github.io/xiaohuangji/
-- 本地预览见下方说明
+clone 下载项目后，表情原图在 `data/` 目录，文件名是内容的 MD5。请不要直接改名或删除原图。日常查看请用上面的 [网页图库](https://esrrhs.github.io/xiaohuangji/)，README 不再内嵌表情预览。
 
 # 网页图库
 
 图库是纯静态页面，无第三方库、无后端、无 API。页面里的图片路径仍是原来的 `data/<哈希>.<扩展名>`。
-
-功能：
 
 - **搜索**：匹配已标注的中文标题、标签及其别名，也可搜格式（如 `gif`）或完整哈希文件名。哈希文件名本身没有语义，不能靠文件名做中文语义搜索。
 - **分类**：全部素材都可按格式（GIF / PNG / JPG）筛选；也可筛选「已标注 / 未标注」，以及已出现的语义标签（多选为或关系）。
@@ -63,25 +62,12 @@ node tests/test_search.js
 tests/run_browser_tests.sh 8765
 ```
 
-更新 README 中的缩略图墙仍可用 `./preview.sh`。注意它会用本模板覆盖 `README.md` 再追加 `data/` 预览，请确认模板内容是你想保留的说明。
-
 # GitHub Pages 部署
 
-仓库目前尚未开启 GitHub Pages。图库文件已放在仓库根目录，静态路径按相对路径书写，兼容项目站点 `https://esrrhs.github.io/xiaohuangji/`。
+图库已发布在 https://esrrhs.github.io/xiaohuangji/ 。向默认分支 `master` 推送后，Pages 会按仓库根目录自动更新。
 
-推荐方式（开启一次即可）：
-
-1. 把本仓库的图库改动推送到默认分支 `master`。
-2. 打开仓库 Settings → Pages。
-3. Build and deployment → Source 选择 **Deploy from a branch**。
-4. Branch 选 `master`，文件夹选 `/ (root)`，保存。
-5. 等待几分钟后访问 https://esrrhs.github.io/xiaohuangji/
-
-备选方式：把 Source 改成 **GitHub Actions**，然后在 Actions 中手动运行已准备好的 `.github/workflows/pages.yml`（默认只在 `workflow_dispatch` 触发，避免 Pages 未切换到 Actions 时自动失败）。若确定使用 Actions 部署，可再给该工作流加上 `push` 到 `master` 的触发条件。
-
-`.github/workflows/gallery-check.yml` 会在推送和 PR 时校验清单、标签和搜索逻辑，与 Pages 是否开启无关。
+备选方式是把 Pages Source 设为 GitHub Actions，再手动运行 `.github/workflows/pages.yml`（默认只在 `workflow_dispatch` 触发）。`.github/workflows/gallery-check.yml` 会在推送和 PR 时校验清单、标签和搜索逻辑。
 
 # 我有新表情？
-欢迎提 PR，或者 issues
 
-# 预览
+欢迎提 PR，或者 issues。

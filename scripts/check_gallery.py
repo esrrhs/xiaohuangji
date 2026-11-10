@@ -121,6 +121,16 @@ def main() -> int:
     if "filterItems" not in js or "pickRandom" not in js:
         errors.append("gallery/app.js 缺少 filterItems / pickRandom")
 
+    readme = (ROOT / "README.md").read_text(encoding="utf-8") if (ROOT / "README.md").is_file() else ""
+    if "https://esrrhs.github.io/xiaohuangji/" not in readme:
+        errors.append("README.md 应给出网页图库地址 https://esrrhs.github.io/xiaohuangji/")
+    img_wall = readme.count('<img src="./data/')
+    if img_wall > 5:
+        errors.append(f"README.md 不应再内嵌表情预览墙（发现 {img_wall} 张 data/ 图片）")
+    preview = (ROOT / "preview.sh").read_text(encoding="utf-8") if (ROOT / "preview.sh").is_file() else ""
+    if ">> README.md" in preview or "<img src=" in preview:
+        errors.append("preview.sh 不应再向 README.md 追加表情预览墙")
+
     for msg in warnings:
         print("警告:", msg)
     if errors:
