@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>xiaohuangji gallery display regression</title>
+</head>
+<body>
+  <pre id="results">running…</pre>
+  <iframe id="frame" src="../index.html" style="width:1280px;height:900px;border:0"></iframe>
+  <script>
+    const results = [];
+    function ok(name, cond, detail) {
+      if (!cond) throw new Error(name + (detail ? ": " + detail : ""));
+      results.push("ok - " + name);
+    }
+    function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
+    function contained(img, card, slop) {
+      const ir = img.getBoundingClientRect();
+      const cr = card.getBoundingClientRect();
+      return ir.width > 8 && ir.height > 8 &&
+        ir.left >= cr.left - slop && ir.top >= cr.top - slop &&
+        ir.right <= cr.right + slop && ir.bottom <= cr.bottom + slop;
+    }
+    function auditGrid(doc, label) {
+      const cards = [...doc.querySelectorAll("#grid .card")];
+      const failures = [];
+      cards.forEach((card, i) => {
+        const img = card.querySelector("img");
+        const cr = card.getBoundingClientRect();
+        if (!img) { failures.push("card " + i + " missing img"); return; }
+        if (cr.width < 40 || cr.height < 40) failures.push(img.getAttribute("src") + " card too small " + cr.width + "x" + cr.height);
+        if (Math.abs(cr.width - cr.height) > 2) failures.push(img.getAttribute("src") + " card not square");
+        if (!(img.naturalWidth > 0 && img.naturalHeight > 0)) {
+          failures.push(img.getAttribute("src") + " not decoded " + img.naturalWidth + "x" + img.naturalHeight + " complete=" + img.complete);
+        }
+        if (!contained(img, card, 1.5)) {
+          const ir = img.getBoundingClientRect();
+          failures.push(img.getAttribute("src") + " overflow/hidden thumb img=" + ir.width.toFixed(1) + "x" + ir.height.toFixed(1) + " @(" + ir.x.toFixed(1) + "," + ir.y.toFixed(1) + ") card=" + cr.width.toFixed(1) + "x" + cr.height.toFixed(1) + " @(" + cr.x.toFixed(1) + "," + cr.y.toFixed(1) + ")");
+        }
+      });
+      return { label, total: cards.length, failures };
+    }
+    async function waitGrid(doc, min) {
+      for (let i = 0; i < 80; i++) {
+        if (doc.querySelectorAll("#grid .card").length >= min) return;
+        await sleep(50);
+      }
+      throw new Error("grid did not render");
+    }
+    async function decodeAll(win, items) {
+      const failed = [];
+      await Promise.all(items.map((item) => new Promise((resolve) => {
+        const img = new win.Image();
+        img.onload = function () {
+          if (!(img.naturalWidth > 0 && img.naturalHeight > 0)) {
+            failed.push(item.src + " onload but 0 size");
+          }
+          resolve();
+        };
+        img.onerror = function () {
+          failed.push(item.src + " onerror");
+          resolve();
+        };
+        img.src = item.src;
+      })));
+      return failed;
+    }
+    async function clickChip(doc, format) {
+      const btn = doc.querySelector('#format-filters [data-format="' + format + '"]');
+      if (!btn) throw new Error("no format chip " + format);
+      btn.click();
+      await sleep(250);
+    }
+    async function openFirst(doc) {
+      const card = doc.querySelector("#grid .card");
+      if (!card) throw new Error("no card to open");
+      const src = card.querySelector("img").getAttribute("src");
+      card.click();
+      await sleep(300);
+      const lb = doc.getElementById("lightbox");
+      const limg = doc.getElementById("lightbox-image");
+      return { src, hidden: lb.hidden, img: limg };
+    }
+    async function run() {
+      const frame = document.getElementById("frame");
+      await new Promise((resolve, reject) => {
+        frame.onload = resolve;
+        setTimeout(() => reject(new Error("iframe timeout")), 15000);
+      });
+      const doc = frame.contentDocument;
+      const win = frame.contentWindow;
+      await waitGrid(doc, 10);
+      await sleep(400);
+
+      const first = auditGrid(doc, "first-screen");
+      ok("first screen has 769 cards", first.total === 769, String(first.total));
+      ok("first screen thumbs fit inside cards", first.failures.length === 0, first.failures.slice(0, 6).join(" | "));
+
+      const viewH = win.innerHeight;
+      const before = [...doc.querySelectorAll("#grid .card")].filter((c) => c.getBoundingClientRect().top < viewH).length;
+      win.scrollTo(0, 2000);
+      await sleep(400);
+      const after = auditGrid(doc, "scrolled");
+      ok("after scroll thumbs still fit", after.failures.length === 0, after.failures.slice(0, 6).join(" | "));
+      const vis = [...doc.querySelectorAll("#grid .card")].filter((c) => {
+        const r = c.getBoundingClientRect();
+        return r.bottom > 0 && r.top < win.innerHeight && r.width > 0;
+      }).length;
+      ok("scroll revealed more or kept cards visible", vis >= 4, "visible=" + vis + " firstScreenVisible=" + before);
+      win.scrollTo(0, 0);
+      await sleep(150);
+
+      await clickChip(doc, "jpg");
+      const jpg = auditGrid(doc, "filter-jpg");
+      ok("jpg filter shows 4 cards", jpg.total === 4, String(jpg.total));
+      ok("jpg thumbs fit inside cards", jpg.failures.length === 0, jpg.failures.join(" | "));
+      const big = [...doc.querySelectorAll("#grid .card img")].find((img) => img.naturalWidth >= 800);
+      ok("large jpg is present and fitted", !!big && contained(big, big.closest(".card"), 1.5), big ? (big.naturalWidth + " box " + big.clientWidth + "x" + big.clientHeight) : "missing");
+
+      const jpgModal = await openFirst(doc);
+      ok("jpg modal opens", jpgModal.hidden === false);
+      ok("jpg modal image decoded and visible", jpgModal.img.naturalWidth > 0 && jpgModal.img.clientWidth > 8 && jpgModal.img.clientHeight > 8, jpgModal.src + " " + jpgModal.img.naturalWidth + "x" + jpgModal.img.naturalHeight + " client " + jpgModal.img.clientWidth);
+      doc.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+      await sleep(150);
+      ok("jpg modal closes on Escape", doc.getElementById("lightbox").hidden === true);
+      const jpgAfter = auditGrid(doc, "jpg-after-modal");
+      ok("jpg thumbs still fit after closing modal", jpgAfter.failures.length === 0, jpgAfter.failures.join(" | "));
+
+      await clickChip(doc, "png");
+      const png = auditGrid(doc, "filter-png");
+      ok("png filter shows 293 cards", png.total === 293, String(png.total));
+      ok("all png thumbs fit inside cards", png.failures.length === 0, png.failures.slice(0, 8).join(" | "));
+      const pngModal = await openFirst(doc);
+      ok("png modal opens", pngModal.hidden === false && /\.png$/i.test(pngModal.src), pngModal.src);
+      ok("png modal image decoded and visible", pngModal.img.naturalWidth > 0 && pngModal.img.clientWidth > 8, pngModal.src);
+      doc.getElementById("lightbox-close").click();
+      await sleep(150);
+      ok("png modal closes", doc.getElementById("lightbox").hidden === true);
+
+      await clickChip(doc, "gif");
+      const gif = auditGrid(doc, "filter-gif");
+      ok("gif filter shows 472 cards", gif.total === 472, String(gif.total));
+      ok("gif thumbs fit inside cards and stay decoded", gif.failures.length === 0, gif.failures.slice(0, 6).join(" | "));
+
+      await clickChip(doc, "");
+      const allAgain = auditGrid(doc, "filter-all");
+      ok("clear format restores 769 fitted thumbs", allAgain.total === 769 && allAgain.failures.length === 0, "n=" + allAgain.total + " " + allAgain.failures.slice(0, 4).join(" | "));
+
+      const manifest = await fetch("../gallery/manifest.json").then((r) => r.json());
+      ok("manifest count", manifest.count === 769);
+      const decodeFails = await decodeAll(win, manifest.items);
+      ok("all 769 sources decode with natural width/height", decodeFails.length === 0, decodeFails.slice(0, 8).join(" | "));
+
+      document.getElementById("results").textContent = results.concat(["ALL_PASSED " + results.length]).join("\n");
+      document.body.setAttribute("data-test-status", "passed");
+    }
+    run().catch((err) => {
+      document.getElementById("results").textContent = results.join("\n") + "\nFAIL " + err.stack;
+      document.body.setAttribute("data-test-status", "failed");
+    });
+  </script>
+</body>
+</html>
