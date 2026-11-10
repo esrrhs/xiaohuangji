@@ -1,0 +1,48 @@
+# 备选部署方式：在仓库 Settings → Pages 将 Source 设为 GitHub Actions 后，
+# 再取消下面 push 的注释，或在 Actions 里手动运行此工作流。
+# 默认建议仍使用「Deploy from a branch → master / root」，无需此工作流。
+name: Deploy GitHub Pages
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Install Pillow
+        run: python3 -m pip install --quiet Pillow
+      - name: Check manifest
+        run: python3 scripts/check_gallery.py
+      - name: Stage site files
+        run: |
+          mkdir -p _site
+          cp index.html _site/
+          cp -R gallery data _site/
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

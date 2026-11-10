@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>xiaohuangji gallery headless tests</title>
+</head>
+<body>
+  <pre id="results">running…</pre>
+  <a class="skip-link" href="#grid">跳到表情列表</a>
+  <input id="search" type="search">
+  <p id="search-hint"></p>
+  <button type="button" id="random-btn">随机一张</button>
+  <button type="button" id="clear-btn">清除筛选</button>
+  <div id="format-filters"></div>
+  <div id="status-filters"></div>
+  <div id="tag-filters"></div>
+  <p id="status"></p>
+  <p id="error" hidden></p>
+  <p id="empty" hidden></p>
+  <section id="grid"></section>
+  <div id="lightbox" hidden role="dialog" aria-modal="true" aria-labelledby="lightbox-title">
+    <div class="lightbox-backdrop" data-close="1"></div>
+    <button type="button" id="lightbox-close">×</button>
+    <button type="button" id="lightbox-prev">‹</button>
+    <button type="button" id="lightbox-next">›</button>
+    <h2 id="lightbox-title"></h2>
+    <p id="lightbox-meta"></p>
+    <p id="lightbox-tags"></p>
+    <button type="button" id="copy-name">复制文件名</button>
+    <a id="open-original">打开原图</a>
+    <img id="lightbox-image" alt="">
+  </div>
+  <script src="../gallery/app.js"></script>
+  <script>
+    const results = [];
+    function ok(name, cond, detail) {
+      if (!cond) throw new Error(name + (detail ? ": " + detail : ""));
+      results.push("ok - " + name);
+    }
+    async function run() {
+      const manifest = await fetch("../gallery/manifest.json").then((r) => {
+        if (!r.ok) throw new Error("manifest HTTP " + r.status);
+        return r.json();
+      });
+      const api = window.XhjGallery;
+      ok("api exported", !!(api && api.filterItems && api.pickRandom));
+      ok("manifest count", manifest.count === 769, String(manifest.count));
+      const gifs = api.filterItems(manifest.items, { format: "gif" }, manifest.vocabulary);
+      ok("gif baseline", gifs.length === 472);
+
+      await api.mount({ manifestUrl: "../gallery/manifest.json" });
+      const status = document.getElementById("status").textContent;
+      ok("mounted status", status.indexOf("显示 769 / 769") !== -1, status);
+
+      document.getElementById("search").value = "哭";
+      document.getElementById("search").dispatchEvent(new Event("input", { bubbles: true }));
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      const afterSearch = document.getElementById("status").textContent;
+      ok("search updates status", /显示 [1-9]\d* \/ 769/.test(afterSearch), afterSearch);
+      ok("cards rendered", document.querySelectorAll("#grid .card").length > 0);
+      ok("empty hidden after search hits", document.getElementById("empty").hidden);
+
+      document.getElementById("search").value = "绝对不会命中的查询xyz987";
+      document.getElementById("search").dispatchEvent(new Event("input", { bubbles: true }));
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      ok("empty state shown", document.getElementById("empty").hidden === false);
+      ok("no cards when empty", document.querySelectorAll("#grid .card").length === 0);
+
+      document.getElementById("clear-btn").click();
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      ok("clear restores all", document.getElementById("status").textContent.indexOf("显示 769 / 769") !== -1);
+
+      document.getElementById("random-btn").click();
+      const lightbox = document.getElementById("lightbox");
+      ok("random opens preview", lightbox.hidden === false);
+      ok("preview has image", !!document.getElementById("lightbox-image").getAttribute("src"));
+
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+      ok("escape closes preview", lightbox.hidden === true);
+
+      document.getElementById("error").hidden = false;
+      document.getElementById("results").textContent = results.concat(["ALL_PASSED " + results.length]).join("\n");
+      document.body.setAttribute("data-test-status", "passed");
+    }
+    run().catch((err) => {
+      document.getElementById("results").textContent = results.join("\n") + "\nFAIL " + err.stack;
+      document.body.setAttribute("data-test-status", "failed");
+    });
+  </script>
+</body>
+</html>

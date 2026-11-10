@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="小黄鸡表情图库：搜索、分类、预览和随机挑选。语义搜索仅覆盖已人工标注的表情。">
+  <title>小黄鸡表情图库</title>
+  <link rel="icon" href="data/ae57242ff3bbab5a836a7c63193648dc.gif">
+  <link rel="preload" href="gallery/manifest.json" as="fetch" crossorigin>
+  <link rel="stylesheet" href="gallery/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#grid">跳到表情列表</a>
+  <header class="hero">
+    <div class="hero-inner">
+      <img class="hero-mascot" src="data/ae57242ff3bbab5a836a7c63193648dc.gif" alt="" width="70" height="48">
+      <div class="hero-text">
+        <p class="eyebrow">esrrhs / xiaohuangji</p>
+        <h1>小黄鸡表情图库</h1>
+        <p class="lede">收集各种小黄鸡表情。支持按格式浏览、搜索已标注语义、点击预览，以及在当前结果里随机挑选。</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="toolbar" aria-label="筛选与搜索">
+      <div class="search-row">
+        <label class="search">
+          <span class="sr-only">搜索表情</span>
+          <input id="search" type="search" placeholder="搜索已标注的语义、标题，或格式、文件名…" autocomplete="off" enterkeyhint="search">
+        </label>
+        <button type="button" id="random-btn" class="btn btn-primary">随机一张</button>
+        <button type="button" id="clear-btn" class="btn">清除筛选</button>
+      </div>
+      <p id="search-hint" class="hint"></p>
+
+      <div class="filters">
+        <div class="filter-group" id="format-filters" role="group" aria-label="按格式分类"></div>
+        <div class="filter-group" id="status-filters" role="group" aria-label="标注状态"></div>
+        <div class="filter-groups" id="tag-filters" aria-label="语义标签"></div>
+      </div>
+    </section>
+
+    <p id="status" class="status" role="status"></p>
+    <p id="error" class="error" hidden></p>
+    <p id="empty" class="empty" hidden>没有符合条件的表情。试试清除筛选，或只用格式分类浏览未标注素材。</p>
+
+    <section id="grid" class="grid" aria-live="polite"></section>
+  </main>
+
+  <footer class="foot">
+    <p>内容收集自网络，如侵权请联系删除。原图路径保持 <code>data/</code> 下的哈希文件名不变。</p>
+    <p>语义标签为人工抽检标注，未覆盖全部素材；不能把哈希文件名当成可搜索的中文含义。</p>
+  </footer>
+
+  <div id="lightbox" class="lightbox" hidden role="dialog" aria-modal="true" aria-labelledby="lightbox-title">
+    <div class="lightbox-backdrop" data-close="1"></div>
+    <div class="lightbox-dialog">
+      <button type="button" class="lightbox-close" id="lightbox-close" aria-label="关闭预览">×</button>
+      <button type="button" class="lightbox-nav prev" id="lightbox-prev" aria-label="上一张">‹</button>
+      <figure class="lightbox-figure">
+        <img id="lightbox-image" alt="">
+        <figcaption>
+          <h2 id="lightbox-title"></h2>
+          <p id="lightbox-meta"></p>
+          <p id="lightbox-tags" class="lightbox-tags"></p>
+          <p class="lightbox-actions">
+            <button type="button" id="copy-name" class="btn">复制文件名</button>
+            <a id="open-original" class="btn" target="_blank" rel="noopener">打开原图</a>
+          </p>
+        </figcaption>
+      </figure>
+      <button type="button" class="lightbox-nav next" id="lightbox-next" aria-label="下一张">›</button>
+    </div>
+  </div>
+
+  <noscript>
+    <p class="noscript">浏览图库需要启用 JavaScript。图片仍可在 <code>data/</code> 目录中直接查看。</p>
+  </noscript>
+  <script src="gallery/app.js"></script>
+</body>
+</html>
