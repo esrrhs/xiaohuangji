@@ -52,7 +52,7 @@ body {
 }
 
 .hero {
-  padding: 28px 20px 8px;
+  padding: 20px 20px 0;
 }
 .hero-inner {
   max-width: 1100px;
@@ -93,15 +93,39 @@ h1 {
   padding: 16px 20px 64px;
 }
 
-.toolbar {
+.toolbar-sticky {
+  position: -webkit-sticky;
   position: sticky;
   top: 0;
-  z-index: 5;
+  z-index: 6;
+  background: #fff8ec;
   background: color-mix(in srgb, var(--bg) 88%, white);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   padding: 12px 0 8px;
-  border-bottom: 1px solid transparent;
 }
+.tag-panel {
+  margin: 4px 0 0;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--paper);
+  padding: 0 10px;
+}
+.tag-panel summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 8px 0;
+  font-weight: 600;
+  color: var(--ink);
+}
+.tag-panel summary::-webkit-details-marker { display: none; }
+.tag-panel summary::after {
+  content: " ▾";
+  color: var(--muted);
+  font-weight: 400;
+}
+.tag-panel[open] summary::after { content: " ▴"; }
+.tag-panel #tag-filters { padding-bottom: 6px; }
 .search-row {
   display: flex;
   gap: 10px;
@@ -148,10 +172,10 @@ h1 {
 
 .hint, .status, .empty, .error, .foot, .noscript {
   color: var(--muted);
-  line-height: 1.55;
+  line-height: 1.5;
 }
-.hint { margin: 10px 0 0; font-size: 0.9rem; }
-.status { margin: 10px 0 16px; font-weight: 600; color: var(--ink); }
+.hint { margin: 6px 0 0; font-size: 0.82rem; }
+.status { margin: 8px 0 12px; font-weight: 600; color: var(--ink); }
 .error {
   background: #fff1f0;
   color: var(--danger);
@@ -171,13 +195,13 @@ h1 {
 .filter-group, .tag-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin: 0 0 10px;
+  gap: 6px;
+  margin: 0 0 6px;
 }
 .group-label {
   width: 100%;
-  margin: 6px 0 0;
-  font-size: 0.78rem;
+  margin: 2px 0 0;
+  font-size: 0.74rem;
   color: var(--muted);
   letter-spacing: 0.08em;
 }
@@ -209,6 +233,7 @@ h1 {
   gap: 12px;
 }
 .card {
+  -webkit-appearance: none;
   appearance: none;
   border: 0;
   padding: 0;
@@ -218,11 +243,19 @@ h1 {
   overflow: hidden;
   cursor: pointer;
   position: relative;
-  aspect-ratio: 1;
   display: block;
   width: 100%;
   min-width: 0;
   min-height: 0;
+  aspect-ratio: 1;
+}
+.card::before {
+  content: "";
+  display: block;
+  padding-top: 100%;
+}
+@supports (aspect-ratio: 1) {
+  .card::before { content: none; display: none; padding-top: 0; }
 }
 .card:hover, .card:focus-visible {
   transform: translateY(-2px);
@@ -234,6 +267,10 @@ h1 {
      percentages work. Otherwise large PNG/JPG keep their intrinsic
      height, overflow the square card, and only a clipped corner shows. */
   position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   inset: 0;
   display: flex;
   align-items: center;
@@ -248,6 +285,20 @@ h1 {
     linear-gradient(-45deg, transparent 75%, #f3efe4 75%);
   background-size: 16px 16px;
   background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+}
+.card-thumb.is-error::after {
+  content: "加载失败";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.7rem;
+  color: var(--muted);
+  background: var(--paper);
+  padding: 2px 6px;
+  border-radius: 8px;
+  pointer-events: none;
+  z-index: 1;
 }
 .card-thumb img {
   display: block;
@@ -361,7 +412,21 @@ h1 {
 .lightbox-nav:disabled { opacity: 0.35; cursor: default; }
 
 @media (max-width: 700px) {
+  .hero { padding: 16px 16px 0; }
+  .hero-mascot { width: 64px; }
   .hero-inner { align-items: flex-start; }
+  .lede { display: none; }
+  .hint { display: none; }
+  .toolbar-sticky {
+    padding-top: 10px;
+    max-height: 38vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .search-row { gap: 8px; }
+  .btn { padding: 8px 12px; }
+  .status { margin: 8px 0 12px; }
   .lightbox-dialog { grid-template-columns: 1fr; grid-template-rows: auto 1fr auto; }
   .lightbox-nav.prev { justify-self: start; }
   .lightbox-nav.next { justify-self: end; }

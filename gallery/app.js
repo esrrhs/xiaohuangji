@@ -158,6 +158,7 @@
   function mount(options) {
     const opts = options || {};
     const doc = opts.document || document;
+    const win = doc.defaultView || opts.window || (typeof window !== "undefined" ? window : null);
     const manifestUrl = opts.manifestUrl || "gallery/manifest.json";
     const state = {
       query: "",
@@ -258,6 +259,30 @@
         });
         els.tags.appendChild(row);
       });
+      updateTagSummary();
+    }
+
+    function updateTagSummary() {
+      const el = doc.getElementById("tag-summary");
+      if (!el) return;
+      const selected = state.tags.length;
+      el.textContent = selected ? ("语义标签（已选 " + selected + "）") : "语义标签";
+    }
+
+    function initTagPanel() {
+      const panel = doc.getElementById("tag-panel");
+      if (!panel || typeof panel.open === "undefined") return;
+      const wide = win && win.matchMedia ? win.matchMedia("(min-width: 701px)") : null;
+      if (wide && wide.matches) panel.open = true;
+      if (wide && wide.addEventListener) {
+        wide.addEventListener("change", function (event) {
+          panel.open = event.matches;
+        });
+      } else if (wide && wide.addListener) {
+        wide.addListener(function (event) {
+          panel.open = event.matches;
+        });
+      }
     }
 
     function effectiveFilters() {
@@ -293,11 +318,14 @@
         const thumb = createEl("span", { className: "card-thumb" });
         const img = createEl("img", {
           alt: item.title || "",
-          loading: "lazy",
+          loading: index < 24 ? "eager" : "lazy",
           decoding: "async",
           src: item.src,
           width: String(item.width || 80),
           height: String(item.height || 80),
+        });
+        img.addEventListener("error", function () {
+          thumb.classList.add("is-error");
         });
         thumb.appendChild(img);
         card.appendChild(thumb);
@@ -498,6 +526,7 @@
       if (els.search && state.query) els.search.value = state.query;
       renderHint();
       renderFilters();
+      initTagPanel();
       apply();
       wire();
     }

@@ -7,7 +7,7 @@
   <title>小黄鸡表情图库</title>
   <link rel="icon" href="data/ae57242ff3bbab5a836a7c63193648dc.gif">
   <link rel="preload" href="gallery/manifest.json" as="fetch" crossorigin>
-  <link rel="stylesheet" href="gallery/styles.css?v=2">
+  <link rel="stylesheet" href="gallery/styles.css?v=3">
 </head>
 <body>
   <a class="skip-link" href="#grid">跳到表情列表</a>
@@ -23,7 +23,7 @@
   </header>
 
   <main class="page">
-    <section class="toolbar" aria-label="筛选与搜索">
+    <div class="toolbar-sticky" role="search">
       <div class="search-row">
         <label class="search">
           <span class="sr-only">搜索表情</span>
@@ -33,13 +33,15 @@
         <button type="button" id="clear-btn" class="btn">清除筛选</button>
       </div>
       <p id="search-hint" class="hint"></p>
-
-      <div class="filters">
+      <div class="filters filters-compact">
         <div class="filter-group" id="format-filters" role="group" aria-label="按格式分类"></div>
         <div class="filter-group" id="status-filters" role="group" aria-label="标注状态"></div>
-        <div class="filter-groups" id="tag-filters" aria-label="语义标签"></div>
       </div>
-    </section>
+    </div>
+    <details class="tag-panel" id="tag-panel">
+      <summary id="tag-summary">语义标签</summary>
+      <div class="filter-groups" id="tag-filters" aria-label="语义标签"></div>
+    </details>
 
     <p id="status" class="status" role="status"></p>
     <p id="error" class="error" hidden></p>
@@ -77,6 +79,6 @@
   <noscript>
     <p class="noscript">浏览图库需要启用 JavaScript。图片仍可在 <code>data/</code> 目录中直接查看。</p>
   </noscript>
-  <script src="gallery/app.js"></script>
+  <script src="gallery/app.js?v=2"></script>
 </body>
 </html>

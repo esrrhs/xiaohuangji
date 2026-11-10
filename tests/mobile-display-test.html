@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>xiaohuangji mobile first-screen regression</title>
+</head>
+<body>
+  <pre id="results">running…</pre>
+  <iframe id="frame" src="../index.html" style="width:390px;height:844px;border:0"></iframe>
+  <script>
+    const results = [];
+    function ok(name, cond, detail) {
+      if (!cond) throw new Error(name + (detail ? ": " + detail : ""));
+      results.push("ok - " + name);
+    }
+    function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
+    function uncoveredImages(doc, win) {
+      const toolbar = doc.querySelector(".toolbar-sticky") || doc.querySelector(".toolbar");
+      const tb = toolbar ? toolbar.getBoundingClientRect() : { bottom: 0, height: 0 };
+      const sticky = toolbar && (getComputedStyle(toolbar).position === "sticky" || getComputedStyle(toolbar).position === "-webkit-sticky");
+      const coverBottom = sticky ? tb.bottom : 0;
+      return [...doc.querySelectorAll("#grid .card img")].filter(function (img) {
+        const r = img.getBoundingClientRect();
+        const visibleTop = Math.max(r.top, coverBottom, 0);
+        const visibleBottom = Math.min(r.bottom, win.innerHeight);
+        return img.naturalWidth > 0 && r.width > 8 && r.height > 8 && (visibleBottom - visibleTop) > 8;
+      });
+    }
+    async function run() {
+      const frame = document.getElementById("frame");
+      await new Promise(function (resolve, reject) {
+        frame.onload = resolve;
+        setTimeout(function () { reject(new Error("iframe timeout")); }, 15000);
+      });
+      const doc = frame.contentDocument;
+      const win = frame.contentWindow;
+      for (let i = 0; i < 80; i++) {
+        if (doc.querySelectorAll("#grid .card").length >= 10) break;
+        await sleep(50);
+      }
+      await sleep(500);
+
+      ok("mobile iframe viewport is phone-sized", win.innerWidth <= 430 && win.innerHeight >= 600, win.innerWidth + "x" + win.innerHeight);
+      ok("769 cards rendered", doc.querySelectorAll("#grid .card").length === 769, String(doc.querySelectorAll("#grid .card").length));
+
+      const sticky = doc.querySelector(".toolbar-sticky") || doc.querySelector(".toolbar");
+      const tb = sticky.getBoundingClientRect();
+      ok("compact bar is shorter than the viewport", tb.height < win.innerHeight - 80, "toolbar=" + tb.height + " vh=" + win.innerHeight);
+      const panel = doc.getElementById("tag-panel");
+      ok("semantic tags start collapsed on a narrow screen", !panel || panel.open === false, panel ? String(panel.open) : "missing");
+
+      const first = uncoveredImages(doc, win);
+      ok("first screen shows uncovered sticker thumbnails", first.length >= 4, "visible=" + first.length + " toolbarBottom=" + Math.round(tb.bottom) + " gridTop=" + Math.round(doc.getElementById("grid").getBoundingClientRect().top));
+
+      win.scrollTo(0, 600);
+      await sleep(350);
+      const after = uncoveredImages(doc, win);
+      ok("after scrolling, stickers remain visible and not covered by the sticky bar", after.length >= 4, "visible=" + after.length + " stickyH=" + Math.round(tb.height));
+
+      win.scrollTo(0, 0);
+      await sleep(200);
+      if (panel) {
+        panel.open = true;
+        await sleep(100);
+        const openBar = sticky.getBoundingClientRect();
+        ok("even with tags expanded, sticky bar cannot cover the whole viewport", openBar.height < win.innerHeight - 40, "stickyH=" + openBar.height + " vh=" + win.innerHeight);
+        panel.open = false;
+        await sleep(100);
+      }
+
+      const pngBtn = doc.querySelector('#format-filters [data-format="png"]');
+      pngBtn.click();
+      await sleep(300);
+      win.scrollTo(0, 0);
+      await sleep(200);
+      const pngVisible = uncoveredImages(doc, win);
+      ok("png filter still shows first-screen thumbnails", pngVisible.length >= 4, "visible=" + pngVisible.length);
+      ok("png filter card count is 293", doc.querySelectorAll("#grid .card").length === 293, String(doc.querySelectorAll("#grid .card").length));
+
+      const firstCard = doc.querySelector("#grid .card");
+      firstCard.click();
+      await sleep(300);
+      const limg = doc.getElementById("lightbox-image");
+      ok("mobile modal opens with a decoded image", doc.getElementById("lightbox").hidden === false && limg.naturalWidth > 0 && limg.clientWidth > 8, limg.naturalWidth + "x" + limg.clientWidth);
+      doc.getElementById("lightbox-close").click();
+      await sleep(150);
+      ok("mobile modal closes", doc.getElementById("lightbox").hidden === true);
+
+      document.getElementById("results").textContent = results.concat(["ALL_PASSED " + results.length]).join("\n");
+      document.body.setAttribute("data-test-status", "passed");
+    }
+    run().catch(function (err) {
+      document.getElementById("results").textContent = results.join("\n") + "\nFAIL " + err.stack;
+      document.body.setAttribute("data-test-status", "failed");
+    });
+  </script>
+</body>
+</html>

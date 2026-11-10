@@ -17,10 +17,9 @@ fi
 run_one() {
   local path="$1"
   local name="$2"
+  local size="${3:-1280,900}"
   local dump="/tmp/xh-${name}-dump.html"
-  "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage \
-    --window-size=1280,900 --virtual-time-budget=40000 --timeout=50000 \
-    --dump-dom "http://127.0.0.1:${PORT}/${path}" > "$dump"
+  "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage     --window-size="${size}" --virtual-time-budget=40000 --timeout=50000     --dump-dom "http://127.0.0.1:${PORT}/${path}" > "$dump"
   if grep -q "ALL_PASSED" "$dump"; then
     echo "浏览器无 GUI 测试通过（${name}）："
     grep -E 'ok -|ALL_PASSED' "$dump" | sed 's/<[^>]*>//g' | sed '/^$/d'
@@ -33,3 +32,4 @@ run_one() {
 
 run_one "tests/browser-test.html" "gallery-logic"
 run_one "tests/browser-display-test.html" "gallery-display"
+run_one "tests/mobile-display-test.html" "gallery-mobile" "500,1100"
