@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-11-10T22:22:26+08:00",
+  "generatedAt": "2026-11-10T22:27:46+08:00",
   "dataDir": "data",
   "count": 769,
-  "taggedCount": 768,
-  "untaggedCount": 1,
+  "taggedCount": 769,
+  "untaggedCount": 0,
   "formats": {
     "gif": 472,
     "jpg": 4,
@@ -533,6 +533,13 @@
       "aliases": [
         "加点",
         "加班了"
+      ]
+    },
+    "拍照": {
+      "group": "动作",
+      "aliases": [
+        "摄影",
+        "照相"
       ]
     }
   },
@@ -9433,9 +9440,11 @@
       "height": 42,
       "bytes": 4466,
       "frames": 1,
-      "tags": [],
-      "title": "",
-      "tagged": false,
+      "tags": [
+        "拍照"
+      ],
+      "title": "手机拍照",
+      "tagged": true,
       "media": "PNG"
     },
     {

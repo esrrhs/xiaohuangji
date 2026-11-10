@@ -61,6 +61,19 @@ test("Chinese semantic query does not pretend hash names are meaningful", () => 
   });
 });
 
+test("拍照 search and aliases hit the photographed sticker", () => {
+  const file = "bcaa4c5f7b6912124dba80afa4b4fe46.png";
+  for (const q of ["拍照", "摄影", "照相"]) {
+    const hits = api.filterItems(manifest.items, { query: q }, manifest.vocabulary);
+    assert.ok(hits.some((item) => item.file === file), "missing " + q);
+    assert.ok(hits.every((item) => item.tagged));
+  }
+  const byTag = api.filterItems(manifest.items, { tags: ["拍照"] }, manifest.vocabulary);
+  assert.strictEqual(byTag.length, 1);
+  assert.strictEqual(byTag[0].file, file);
+  assert.strictEqual(byTag[0].title, "手机拍照");
+});
+
 test("tag OR filter intersects with format", () => {
   const angry = api.filterItems(manifest.items, { tags: ["生气"] }, manifest.vocabulary);
   assert.ok(angry.length >= 1);

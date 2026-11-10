@@ -1,6 +1,6 @@
 {
   "_comment": "人工语义标签。只收录经过实际查看确认的图片；未出现在 items 里的文件一律视为未标注，不要根据哈希文件名臆造含义。修改后请运行 python3 scripts/build_manifest.py。",
-  "version": 2,
+  "version": 3,
   "vocabulary": {
     "开心": {
       "group": "情绪",
@@ -526,6 +526,13 @@
         "加点",
         "加班了"
       ]
+    },
+    "拍照": {
+      "group": "动作",
+      "aliases": [
+        "摄影",
+        "照相"
+      ]
     }
   },
   "items": {
@@ -999,6 +1006,12 @@
         "洗澡"
       ],
       "title": "洗澡"
+    },
+    "bcaa4c5f7b6912124dba80afa4b4fe46.png": {
+      "tags": [
+        "拍照"
+      ],
+      "title": "手机拍照"
     },
     "c1bbe7a80f00ed415bfc9c26c77ce09c.png": {
       "tags": [

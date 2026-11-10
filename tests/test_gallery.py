@@ -29,10 +29,14 @@ class ManifestTests(unittest.TestCase):
             self.manifest["taggedCount"] + self.manifest["untaggedCount"],
             self.manifest["count"],
         )
+        self.assertEqual(self.manifest["taggedCount"], 769)
+        self.assertEqual(self.manifest["untaggedCount"], 0)
         self.assertEqual(self.manifest["taggedCount"], len(self.tags["items"]))
-        # Library is treated as fully tagged aside from any leftover that could not be understood.
-        self.assertGreaterEqual(self.manifest["taggedCount"], 768)
-        self.assertLessEqual(self.manifest["untaggedCount"], 1)
+        self.assertTrue(all(item["tagged"] and item["tags"] for item in self.manifest["items"]))
+        photo = next(item for item in self.manifest["items"] if item["file"].startswith("bcaa4c5f"))
+        self.assertEqual(photo["tags"], ["拍照"])
+        self.assertEqual(photo["title"], "手机拍照")
+        self.assertIn("拍照", self.tags["vocabulary"])
 
     def test_every_data_file_is_listed_and_paths_stable(self) -> None:
         data = {p.name for p in (ROOT / "data").iterdir() if p.is_file()}

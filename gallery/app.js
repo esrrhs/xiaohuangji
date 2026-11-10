@@ -159,7 +159,7 @@
     const opts = options || {};
     const doc = opts.document || document;
     const win = doc.defaultView || opts.window || (typeof window !== "undefined" ? window : null);
-    const manifestUrl = opts.manifestUrl || "gallery/manifest.json?v=2";
+    const manifestUrl = opts.manifestUrl || "gallery/manifest.json?v=3";
     const state = {
       query: "",
       format: "",
